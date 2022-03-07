@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './extensions/widget_extensions.dart';
 
 const title = 'My App';
 
@@ -29,8 +30,21 @@ class _HomeState extends State<Home> {
     'white',
     'gray',
     'black',
-    'brown'
+    'brown',
+    'aqua',
+    'teal',
+    'amber',
+    'turquoise',
+    'peach',
   ];
+
+  void addItem() {
+    if (moreItems.isEmpty) return;
+    setState(() {
+      final item = moreItems.removeAt(0);
+      items.add(item);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,29 +52,31 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: Center(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            if (moreItems.isEmpty) return;
-            setState(() {
-              final item = moreItems.removeAt(0);
-              items.add(item);
-            });
-          },
-          child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: items.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Card(
-                child: ListTile(
-                  title: Text(
-                    items[index],
-                  ),
-                ),
-              );
+      body: Column(
+        children: [
+          Text('Pull to refresh.'),
+          RefreshIndicator(
+            onRefresh: () async {
+              addItem();
+              addItem();
             },
-          ),
-        ),
+            //TODO: Fix ability to scroll when there are
+            //TODO: more items than will fit on the screen.
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      items[index],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ).expanded,
+        ],
       ),
     );
   }
