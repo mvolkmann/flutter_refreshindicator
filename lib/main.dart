@@ -21,6 +21,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final refreshKey = GlobalKey<RefreshIndicatorState>();
   final items = <String>[];
   final moreItems = [
     'red',
@@ -51,8 +52,11 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> loadItems() async {
+    refreshKey.currentState?.show();
     await Future.delayed(Duration(seconds: 1)); // simulates API call
     setState(() {
+      // In this implementation we add items to the beginning of the list.
+      // Another approach is to completely replace the list with new data.
       addItem();
       addItem();
       addItem();
@@ -72,6 +76,7 @@ class _HomeState extends State<Home> {
           items.isEmpty
               ? CircularProgressIndicator().center
               : RefreshIndicator(
+                  key: refreshKey,
                   // This function updates the scrollable contents,
                   // in this case the items in a ListView.
                   // The refresh indicator disappears when
