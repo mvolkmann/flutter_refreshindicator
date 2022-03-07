@@ -50,7 +50,8 @@ class _HomeState extends State<Home> {
     if (moreItems.isNotEmpty) items.insert(0, moreItems.removeAt(0));
   }
 
-  void loadItems() {
+  Future<void> loadItems() async {
+    await Future.delayed(Duration(seconds: 1)); // simulates API call
     setState(() {
       addItem();
       addItem();
@@ -71,13 +72,11 @@ class _HomeState extends State<Home> {
           items.isEmpty
               ? CircularProgressIndicator().center
               : RefreshIndicator(
-                  onRefresh: () async {
-                    // This function updates the scrollable contents,
-                    // in this case the items in a ListView.
-                    // The refresh indicator disappears when
-                    // the promise returned by this function completes.
-                    loadItems();
-                  },
+                  // This function updates the scrollable contents,
+                  // in this case the items in a ListView.
+                  // The refresh indicator disappears when
+                  // the promise returned by this function completes.
+                  onRefresh: loadItems,
                   child: Scrollbar(
                     child: ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
