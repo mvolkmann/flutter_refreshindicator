@@ -21,7 +21,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final refreshKey = GlobalKey<RefreshIndicatorState>();
+  final keyRefresh = GlobalKey<RefreshIndicatorState>();
   final items = <String>[];
   final moreItems = [
     'red',
@@ -44,7 +44,11 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    loadItems();
+
+    Future.delayed(Duration(seconds: 0)).then((_) {
+      // This triggers a call on the RefreshIndicator onRefresh function.
+      keyRefresh.currentState?.show();
+    });
   }
 
   void addItem() {
@@ -52,7 +56,6 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> loadItems() async {
-    refreshKey.currentState?.show();
     await Future.delayed(Duration(seconds: 1)); // simulates API call
     setState(() {
       // In this implementation we add items to the beginning of the list.
@@ -73,31 +76,29 @@ class _HomeState extends State<Home> {
         children: [
           Text('Pull to refresh.'),
           // This can only be used with a vertical scroll view
-          items.isEmpty
-              ? CircularProgressIndicator().center
-              : RefreshIndicator(
-                  key: refreshKey,
-                  // This function updates the scrollable contents,
-                  // in this case the items in a ListView.
-                  // The refresh indicator disappears when
-                  // the promise returned by this function completes.
-                  onRefresh: loadItems,
-                  child: Scrollbar(
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: items.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Card(
-                          child: ListTile(
-                            title: Text(
-                              items[index],
-                            ),
-                          ),
-                        );
-                      },
+          RefreshIndicator(
+            key: keyRefresh,
+            // This function updates the scrollable contents,
+            // in this case the items in a ListView.
+            // The refresh indicator disappears when
+            // the promise returned by this function completes.
+            onRefresh: loadItems,
+            child: Scrollbar(
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                    child: ListTile(
+                      title: Text(
+                        items[index],
+                      ),
                     ),
-                  ),
-                ).expanded,
+                  );
+                },
+              ),
+            ),
+          ).expanded,
         ],
       ),
     );
