@@ -6,9 +6,7 @@ const title = 'My App';
 void main() => runApp(
       MaterialApp(
         title: title,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: ThemeData(primarySwatch: Colors.blue),
         home: Home(),
       ),
     );
@@ -21,9 +19,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final keyRefresh = GlobalKey<RefreshIndicatorState>();
-  final items = <String>[];
-  final moreItems = [
+  final itemsToLoad = [
     'red',
     'orange',
     'yellow',
@@ -40,25 +36,30 @@ class _HomeState extends State<Home> {
     'turquoise',
     'peach',
   ];
+  final itemsToShow = <String>[];
+  final keyRefresh = GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
     super.initState();
 
-    Future.delayed(Duration(seconds: 0)).then((_) {
-      // This triggers a call on the RefreshIndicator onRefresh function.
-      keyRefresh.currentState?.show();
-    });
+    // Wait for the build method to complete and then
+    // trigger a call to the onRefresh function of the RefreshIndicator
+    // which causes the indicator to display.
+    WidgetsBinding.instance
+        ?.addPostFrameCallback((_) => keyRefresh.currentState?.show());
   }
 
   void addItem() {
-    if (moreItems.isNotEmpty) items.insert(0, moreItems.removeAt(0));
+    if (itemsToLoad.isNotEmpty) {
+      itemsToShow.insert(0, itemsToLoad.removeAt(0));
+    }
   }
 
   Future<void> loadItems() async {
-    await Future.delayed(Duration(seconds: 1)); // simulates API call
+    await Future.delayed(Duration(seconds: 5)); // simulates API call
     setState(() {
-      // In this implementation we add items to the beginning of the list.
+      // Items are added to the beginning of the list.
       // Another approach is to completely replace the list with new data.
       addItem();
       addItem();
@@ -69,9 +70,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
           Text('Pull to refresh.'),
@@ -86,14 +85,10 @@ class _HomeState extends State<Home> {
             child: Scrollbar(
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: items.length,
+                itemCount: itemsToShow.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Card(
-                    child: ListTile(
-                      title: Text(
-                        items[index],
-                      ),
-                    ),
+                    child: ListTile(title: Text(itemsToShow[index])),
                   );
                 },
               ),
